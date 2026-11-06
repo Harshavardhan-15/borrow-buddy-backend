@@ -1,0 +1,8 @@
+# Only used when the Docker build context is set to ./backend.
+# The documented build uses the repository root as the context, where the
+# root .dockerignore applies. Kept for convenience.
+target/
+uploads/
+*.log
+.idea/
+.vscode/

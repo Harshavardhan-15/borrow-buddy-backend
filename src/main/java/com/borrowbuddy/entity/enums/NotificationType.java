@@ -1,0 +1,15 @@
+package com.borrowbuddy.entity.enums;
+
+public enum NotificationType {
+    BORROW_REQUEST,
+    REQUEST_APPROVED,
+    REQUEST_REJECTED,
+    REQUEST_CANCELLED,
+    RETURN_REMINDER,
+    OVERDUE,
+    HANDOVER_COMPLETED,
+    ITEM_RETURNED,
+    REVIEW_RECEIVED,
+    REPORT_RECEIVED,
+    SYSTEM
+}
