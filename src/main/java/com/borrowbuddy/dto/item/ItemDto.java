@@ -3,6 +3,7 @@ package com.borrowbuddy.dto.item;
 import com.borrowbuddy.entity.enums.AvailabilityStatus;
 import com.borrowbuddy.entity.enums.ItemCondition;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -14,6 +15,8 @@ public record ItemDto(
         String imageUrl,
         ItemCondition itemCondition,
         AvailabilityStatus availabilityStatus,
+        BigDecimal pricePerDay,
+        BigDecimal securityDeposit,
         boolean availableNow,
         boolean reservedNow,
         LocalDate nextAvailableDate,

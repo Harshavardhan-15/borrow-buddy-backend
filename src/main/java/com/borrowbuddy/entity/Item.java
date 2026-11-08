@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -44,6 +45,14 @@ public class Item {
     @Column(name = "availability_status", nullable = false, length = 20)
     private AvailabilityStatus availabilityStatus = AvailabilityStatus.AVAILABLE;
 
+    /** Rental price per day in INR. Zero means the item is free to borrow. */
+    @Column(name = "price_per_day", nullable = false, precision = 10, scale = 2)
+    private BigDecimal pricePerDay = BigDecimal.ZERO;
+
+    /** Refundable security deposit in INR. Zero means no deposit is required. */
+    @Column(name = "security_deposit", nullable = false, precision = 10, scale = 2)
+    private BigDecimal securityDeposit = BigDecimal.ZERO;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "fk_items_owner"))
     private Student owner;
@@ -62,6 +71,12 @@ public class Item {
         }
         if (availabilityStatus == null) {
             availabilityStatus = AvailabilityStatus.AVAILABLE;
+        }
+        if (pricePerDay == null) {
+            pricePerDay = BigDecimal.ZERO;
+        }
+        if (securityDeposit == null) {
+            securityDeposit = BigDecimal.ZERO;
         }
     }
 }

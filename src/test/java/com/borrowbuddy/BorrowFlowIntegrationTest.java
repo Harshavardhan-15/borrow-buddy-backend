@@ -44,10 +44,14 @@ class BorrowFlowIntegrationTest {
                 "category", "Electronics",
                 "description", "Exam approved calculator with slide cover.",
                 "itemCondition", "GOOD",
-                "availabilityStatus", "AVAILABLE"
+                "availabilityStatus", "AVAILABLE",
+                "pricePerDay", 25.50,
+                "securityDeposit", 200
         ));
         long itemId = createdItem.at("/data/id").asLong();
         assertTrue(itemId > 0);
+        assertEquals(25.50, createdItem.at("/data/pricePerDay").asDouble(), 0.001);
+        assertEquals(200.00, createdItem.at("/data/securityDeposit").asDouble(), 0.001);
 
         // Owner cannot borrow their own item
         perform(post("/api/borrow-requests"), ownerToken, 400, Map.of(

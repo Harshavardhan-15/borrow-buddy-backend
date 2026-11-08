@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -65,34 +66,34 @@ public class DataSeeder implements CommandLineRunner {
 
         Item calculator = item(aarav, "Casio FX-991EX Scientific Calculator", "Electronics",
                 "Exam-approved scientific calculator with 552 functions. Includes a protective slide cover.",
-                ItemCondition.GOOD);
+                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("200"));
         Item textbook = item(aarav, "Data Structures & Algorithms Textbook", "Books",
                 "Second edition, clean pages with light highlighting in chapters 3-4. Perfect for CS201.",
-                ItemCondition.LIKE_NEW);
+                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"));
         item(aarav, "Arduino Uno Starter Kit", "Electronics",
                 "Uno R3 board, breadboard, jumper wires, LEDs and a sensor pack. Great for mini projects.",
-                ItemCondition.GOOD);
+                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"));
         item(aarav, "Yonex Badminton Racket", "Sports",
                 "Lightweight graphite racket with a fresh grip. Two shuttlecocks included.",
-                ItemCondition.GOOD);
+                ItemCondition.GOOD, new BigDecimal("25"), new BigDecimal("250"));
         Item labCoat = item(priya, "Women's Lab Coat (Size M)", "Lab Equipment",
                 "Freshly laundered white lab coat, size M. Required for chemistry and biology labs.",
-                ItemCondition.LIKE_NEW);
+                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"));
         Item headphones = item(priya, "Sony WH-CH510 Headphones", "Electronics",
                 "Wireless over-ear headphones with 30-hour battery life and USB-C charging.",
-                ItemCondition.GOOD);
+                ItemCondition.GOOD, new BigDecimal("30"), new BigDecimal("500"));
         item(rohan, "MacBook Pro 67W USB-C Charger", "Electronics",
                 "Original Apple 67W charger with a 2m USB-C cable. Ideal for exam-week emergencies.",
-                ItemCondition.GOOD);
+                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("300"));
         item(rohan, "Canon EOS 200D DSLR Camera", "Electronics",
                 "24MP DSLR with an 18-55mm lens, bag and 64GB SD card. For club events and projects.",
-                ItemCondition.LIKE_NEW);
+                ItemCondition.LIKE_NEW, new BigDecimal("150"), new BigDecimal("2000"));
         item(sara, "Engineering Drawing Kit", "Stationery",
                 "Drawing board, T-square, set squares, compass and isometric sheets. Complete kit.",
-                ItemCondition.NEW);
+                ItemCondition.NEW, new BigDecimal("25"), new BigDecimal("300"));
         item(sara, "Texas Instruments TI-84 Graphing Calculator", "Electronics",
                 "Graphing calculator for calculus and statistics. Batteries included.",
-                ItemCondition.GOOD);
+                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"));
 
         LocalDate today = LocalDate.now();
 
@@ -151,13 +152,16 @@ public class DataSeeder implements CommandLineRunner {
         return studentRepository.save(student);
     }
 
-    private Item item(Student owner, String name, String category, String description, ItemCondition condition) {
+    private Item item(Student owner, String name, String category, String description,
+                      ItemCondition condition, BigDecimal pricePerDay, BigDecimal securityDeposit) {
         Item item = new Item();
         item.setOwner(owner);
         item.setItemName(name);
         item.setCategory(category);
         item.setDescription(description);
         item.setItemCondition(condition);
+        item.setPricePerDay(pricePerDay);
+        item.setSecurityDeposit(securityDeposit);
         item.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         return itemRepository.save(item);
     }

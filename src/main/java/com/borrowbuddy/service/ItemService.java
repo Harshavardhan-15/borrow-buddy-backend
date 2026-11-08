@@ -23,6 +23,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Locale;
 
@@ -144,8 +146,20 @@ public class ItemService {
         item.setImageUrl(request.imageUrl() == null || request.imageUrl().isBlank()
                 ? null : request.imageUrl().trim());
         item.setItemCondition(request.itemCondition());
+        item.setPricePerDay(normalizeMoney(request.pricePerDay()));
+        item.setSecurityDeposit(normalizeMoney(request.securityDeposit()));
         item.setAvailabilityStatus(request.availabilityStatus() == null
                 ? AvailabilityStatus.AVAILABLE : request.availabilityStatus());
+    }
+
+    private BigDecimal normalizeMoney(BigDecimal value) {
+        if (value == null) {
+            return BigDecimal.ZERO.setScale(2, RoundingMode.HALF_UP);
+        }
+        if (value.signum() < 0) {
+            throw new BusinessException("Price and deposit cannot be negative");
+        }
+        return value.setScale(2, RoundingMode.HALF_UP);
     }
 
     private void validateImageUrl(String imageUrl) {
@@ -161,6 +175,7 @@ public class ItemService {
         String field = switch (sortBy == null ? "" : sortBy.toLowerCase(Locale.ROOT)) {
             case "itemname" -> "itemName";
             case "category" -> "category";
+            case "price", "priceperday" -> "pricePerDay";
             default -> "createdAt";
         };
         Sort.Direction dir = "asc".equalsIgnoreCase(direction) ? Sort.Direction.ASC : Sort.Direction.DESC;

@@ -63,6 +63,8 @@ public class MapperService {
                 item.getImageUrl(),
                 item.getItemCondition(),
                 item.getAvailabilityStatus(),
+                item.getPricePerDay(),
+                item.getSecurityDeposit(),
                 item.getOwner().getId(),
                 item.getOwner().getName()
         );
@@ -85,6 +87,8 @@ public class MapperService {
                 item.getImageUrl(),
                 item.getItemCondition(),
                 item.getAvailabilityStatus(),
+                item.getPricePerDay(),
+                item.getSecurityDeposit(),
                 availableNow,
                 reservedNow,
                 reservedNow ? reservedUntil.plusDays(1) : today,
