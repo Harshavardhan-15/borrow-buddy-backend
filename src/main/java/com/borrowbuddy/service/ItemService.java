@@ -148,6 +148,8 @@ public class ItemService {
         item.setItemCondition(request.itemCondition());
         item.setPricePerDay(normalizeMoney(request.pricePerDay()));
         item.setSecurityDeposit(normalizeMoney(request.securityDeposit()));
+        item.setContactPhone(request.contactPhone() == null || request.contactPhone().isBlank()
+                ? null : request.contactPhone().trim());
         item.setAvailabilityStatus(request.availabilityStatus() == null
                 ? AvailabilityStatus.AVAILABLE : request.availabilityStatus());
     }

@@ -17,6 +17,7 @@ public record ItemDto(
         AvailabilityStatus availabilityStatus,
         BigDecimal pricePerDay,
         BigDecimal securityDeposit,
+        String contactPhone,
         boolean availableNow,
         boolean reservedNow,
         LocalDate nextAvailableDate,

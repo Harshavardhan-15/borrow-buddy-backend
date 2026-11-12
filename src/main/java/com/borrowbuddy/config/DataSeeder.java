@@ -66,34 +66,34 @@ public class DataSeeder implements CommandLineRunner {
 
         Item calculator = item(aarav, "Casio FX-991EX Scientific Calculator", "Electronics",
                 "Exam-approved scientific calculator with 552 functions. Includes a protective slide cover.",
-                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("200"));
+                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("200"), "+91 98765 43210");
         Item textbook = item(aarav, "Data Structures & Algorithms Textbook", "Books",
                 "Second edition, clean pages with light highlighting in chapters 3-4. Perfect for CS201.",
-                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"));
+                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"), "+91 98765 43210");
         item(aarav, "Arduino Uno Starter Kit", "Electronics",
                 "Uno R3 board, breadboard, jumper wires, LEDs and a sensor pack. Great for mini projects.",
-                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"));
+                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"), "+91 98765 43210");
         item(aarav, "Yonex Badminton Racket", "Sports",
                 "Lightweight graphite racket with a fresh grip. Two shuttlecocks included.",
-                ItemCondition.GOOD, new BigDecimal("25"), new BigDecimal("250"));
+                ItemCondition.GOOD, new BigDecimal("25"), new BigDecimal("250"), "+91 98765 43210");
         Item labCoat = item(priya, "Women's Lab Coat (Size M)", "Lab Equipment",
                 "Freshly laundered white lab coat, size M. Required for chemistry and biology labs.",
-                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"));
+                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"), "+91 98765 43211");
         Item headphones = item(priya, "Sony WH-CH510 Headphones", "Electronics",
                 "Wireless over-ear headphones with 30-hour battery life and USB-C charging.",
-                ItemCondition.GOOD, new BigDecimal("30"), new BigDecimal("500"));
+                ItemCondition.GOOD, new BigDecimal("30"), new BigDecimal("500"), "+91 98765 43211");
         item(rohan, "MacBook Pro 67W USB-C Charger", "Electronics",
                 "Original Apple 67W charger with a 2m USB-C cable. Ideal for exam-week emergencies.",
-                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("300"));
+                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("300"), "+91 98765 43212");
         item(rohan, "Canon EOS 200D DSLR Camera", "Electronics",
                 "24MP DSLR with an 18-55mm lens, bag and 64GB SD card. For club events and projects.",
-                ItemCondition.LIKE_NEW, new BigDecimal("150"), new BigDecimal("2000"));
+                ItemCondition.LIKE_NEW, new BigDecimal("150"), new BigDecimal("2000"), "+91 98765 43212");
         item(sara, "Engineering Drawing Kit", "Stationery",
                 "Drawing board, T-square, set squares, compass and isometric sheets. Complete kit.",
-                ItemCondition.NEW, new BigDecimal("25"), new BigDecimal("300"));
+                ItemCondition.NEW, new BigDecimal("25"), new BigDecimal("300"), "+91 98765 43213");
         item(sara, "Texas Instruments TI-84 Graphing Calculator", "Electronics",
                 "Graphing calculator for calculus and statistics. Batteries included.",
-                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"));
+                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"), "+91 98765 43213");
 
         LocalDate today = LocalDate.now();
 
@@ -153,7 +153,8 @@ public class DataSeeder implements CommandLineRunner {
     }
 
     private Item item(Student owner, String name, String category, String description,
-                      ItemCondition condition, BigDecimal pricePerDay, BigDecimal securityDeposit) {
+                      ItemCondition condition, BigDecimal pricePerDay, BigDecimal securityDeposit,
+                      String contactPhone) {
         Item item = new Item();
         item.setOwner(owner);
         item.setItemName(name);
@@ -162,6 +163,7 @@ public class DataSeeder implements CommandLineRunner {
         item.setItemCondition(condition);
         item.setPricePerDay(pricePerDay);
         item.setSecurityDeposit(securityDeposit);
+        item.setContactPhone(contactPhone);
         item.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
         return itemRepository.save(item);
     }

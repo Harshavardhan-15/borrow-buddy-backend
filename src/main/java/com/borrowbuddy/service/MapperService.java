@@ -89,6 +89,7 @@ public class MapperService {
                 item.getAvailabilityStatus(),
                 item.getPricePerDay(),
                 item.getSecurityDeposit(),
+                current == null ? null : item.getContactPhone(),
                 availableNow,
                 reservedNow,
                 reservedNow ? reservedUntil.plusDays(1) : today,

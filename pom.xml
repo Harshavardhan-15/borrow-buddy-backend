@@ -126,7 +126,7 @@
                     </excludes>
                 </configuration>
             </plugin>
-            <!-- Package the static frontend inside the Spring Boot jar -->
+            <!-- Package the React frontend build inside the Spring Boot jar -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-resources-plugin</artifactId>
@@ -141,7 +141,7 @@
                             <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
                             <resources>
                                 <resource>
-                                    <directory>${project.basedir}/../frontend</directory>
+                                    <directory>${project.basedir}/../frontend-react/dist</directory>
                                     <filtering>false</filtering>
                                 </resource>
                             </resources>

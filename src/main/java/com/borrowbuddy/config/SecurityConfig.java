@@ -61,6 +61,10 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/reviews/*").permitAll()
                         .requestMatchers("/uploads/**", "/", "/*.html", "/css/**", "/js/**", "/assets/**",
                                 "/favicon.ico", "/error").permitAll()
+                        // React Router entry points (auth is enforced by the API and the UI).
+                        .requestMatchers(HttpMethod.GET, "/login", "/register", "/browse", "/dashboard",
+                                "/requests", "/history", "/notifications", "/profile", "/reviews",
+                                "/items/**", "/students/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
