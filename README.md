@@ -143,17 +143,17 @@ Base path: `/api`. Responses use the envelope
 
 | Area | Endpoints |
 | --- | --- |
-| Public | `GET /api/public/stats`, `GET /api/public/reviews/summary` |
-| Auth | `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout` |
-| Items | `GET /api/items`, `GET /api/items/{id}`, `GET /api/items/mine`, `POST/PUT/DELETE /api/items...` |
-| Requests | `GET /api/requests/sent`, `/received`, `POST /api/requests`, approve/reject/cancel |
-| Transactions | `GET /api/transactions`, QR generation, handover scan, return confirmation |
-| Reviews | `GET /api/reviews/pending`, `/given`, `POST /api/reviews` |
+| Public | `GET /api/public/stats` |
+| Auth | `POST /api/auth/register`, `POST /api/auth/login`, `POST /api/auth/logout`, `GET /api/auth/me` |
+| Items | `GET /api/items`, `/search`, `/featured`, `/mine`, `/{id}`; `POST /api/items`; `PUT`/`DELETE /api/items/{id}` |
+| Requests | `GET /api/borrow-requests/sent`, `/received`, `/{id}`; `POST /api/borrow-requests`; `PUT .../{id}/approve`, `/reject`, `/cancel` |
+| Transactions | `GET /api/transactions`, `/{id}`, `/{id}/qr`; `PUT /api/transactions/{id}/handover`, `/return`; `POST /api/transactions/scan` |
+| Reviews | `POST /api/reviews`; `GET /api/reviews/pending`, `/mine`, `/{studentId}` |
 | Dashboard | `GET /api/dashboard/stats` |
-| Profile | `GET/PUT /api/students/profile`, `GET /api/students/{id}` |
-| Notifications | `GET /api/notifications`, unread count, mark read |
-| Images | `GET /uploads/{filename}` |
-| Admin | Report and moderation endpoints (role `ADMIN`) |
+| Profile | `GET`/`PUT /api/students/profile`; `GET /api/students/{id}` |
+| Notifications | `GET /api/notifications`, `/unread-count`; `PUT /api/notifications/{id}/read`, `/read-all` |
+| Uploads and images | `POST /api/uploads`; `GET /uploads/{filename}` |
+| Reports and admin | `POST /api/reports`; `GET /api/admin/reports`; `PUT /api/admin/reports/{id}` (role `ADMIN`) |
 
 Full request/response reference: [docs/API.md](docs/API.md). A Postman
 collection is in [`postman/`](postman/BorrowBuddy.postman_collection.json).
