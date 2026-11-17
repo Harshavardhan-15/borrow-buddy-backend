@@ -1,0 +1,58 @@
+name: Deploy
+
+# Runs after CI succeeds on main, or manually from the Actions tab.
+# Set the RENDER_DEPLOY_HOOK_URL secret (Render dashboard -> service ->
+# Settings -> Deploy Hook) and, optionally, PUBLIC_BASE_URL so the workflow can
+# wait for the live API to answer /api/public/stats.
+#
+# Note: render.yaml sets autoDeploy: true, so Render already redeploys on push.
+# Use this workflow when you want deploys gated on CI; in that case set
+# autoDeploy: false in render.yaml to avoid triggering two deploys per push.
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  render:
+    name: Deploy to Render
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Trigger Render deploy hook
+        env:
+          DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
+        run: |
+          if [ -z "$DEPLOY_HOOK" ]; then
+            echo "::error::RENDER_DEPLOY_HOOK_URL is not configured. Add it under Settings -> Secrets and variables -> Actions."
+            exit 1
+          fi
+          echo "Triggering Render deploy..."
+          curl -fsS -X POST "$DEPLOY_HOOK" -o /dev/null -w "Render responded with HTTP %{http_code}\n"
+
+      - name: Wait for the live API
+        env:
+          BASE_URL: ${{ vars.PUBLIC_BASE_URL }}
+        run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "PUBLIC_BASE_URL is not set; skipping the live health check."
+            exit 0
+          fi
+          url="${BASE_URL%/}/api/public/stats"
+          echo "Polling $url"
+          for attempt in $(seq 1 60); do
+            if curl -fsS --max-time 10 "$url" >/dev/null; then
+              echo "Live API is healthy after $attempt attempt(s)."
+              exit 0
+            fi
+            sleep 10
+          done
+          echo "::error::The API did not become healthy within 10 minutes."
+          exit 1

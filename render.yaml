@@ -1,0 +1,62 @@
+# ---------------------------------------------------------------------------
+# Render blueprint for the BorrowBuddy API.
+#
+# 1. Push this repository to GitHub.
+# 2. Render -> New -> Blueprint -> select the repository.
+# 3. Fill in the secret environment variables marked "sync: false".
+#
+# The React frontend is deployed separately (Vercel). Set FRONTEND_URL to that
+# origin so the browser can call this API.
+# ---------------------------------------------------------------------------
+
+services:
+  - type: web
+    name: borrowbuddy-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /api/public/stats
+    autoDeploy: true
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      - key: PORT
+        value: 8080
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE
+        value: 10
+      - key: DB_DDL_AUTO
+        value: update
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_EXPIRATION_MS
+        value: 86400000
+      - key: FRONTEND_URL
+        sync: false
+      - key: ALLOWED_EMAIL_DOMAINS
+        value: college.edu
+      - key: UPLOAD_DIR
+        value: /app/uploads
+      - key: UPLOAD_MAX_BYTES
+        value: 5242880
+      - key: IMPORT_DEMO_IMAGES
+        value: "true"
+      - key: RATE_LIMIT_ENABLED
+        value: "true"
+      - key: RATE_LIMIT_AUTH_PER_MINUTE
+        value: "10"
+      - key: MAIL_ENABLED
+        value: "false"
+      - key: SEED_ENABLED
+        value: "false"
+      - key: REMINDER_CRON
+        value: 0 0 8 * * *
+    # Images are stored in MySQL (stored_images table), so no persistent disk
+    # is required and the free plan works.

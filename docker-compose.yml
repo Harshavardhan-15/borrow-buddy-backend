@@ -1,0 +1,71 @@
+# ---------------------------------------------------------------------------
+# BorrowBuddy - local / self-hosted API stack
+#
+#   docker compose up --build
+#   API: http://localhost:8080/api/public/stats
+#
+# The React frontend is deployed separately. For local UI development run it
+# with `npm run dev` in the frontend repository (Vite proxies to port 8080).
+# ---------------------------------------------------------------------------
+
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: borrowbuddy-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-BorrowBuddy_root_2026!}
+      MYSQL_DATABASE: borrowbuddy_db
+      MYSQL_USER: ${MYSQL_USER:-borrowbuddy}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-BorrowBuddy_dev_2026!}
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-BorrowBuddy_root_2026!}"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: borrowbuddy-api
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: 8080
+      DB_URL: jdbc:mysql://mysql:3306/borrowbuddy_db?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=utf8
+      DB_USERNAME: ${MYSQL_USER:-borrowbuddy}
+      DB_PASSWORD: ${MYSQL_PASSWORD:-BorrowBuddy_dev_2026!}
+      DB_DDL_AUTO: update
+      JWT_SECRET: ${JWT_SECRET:-change-me-this-is-a-local-only-secret-0123456789abcdef}
+      JWT_EXPIRATION_MS: 86400000
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:5173}
+      ALLOWED_EMAIL_DOMAINS: ${ALLOWED_EMAIL_DOMAINS:-college.edu}
+      UPLOAD_DIR: /app/uploads
+      MAIL_ENABLED: "false"
+      SEED_ENABLED: "false"
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    volumes:
+      - uploads:/app/uploads
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:8080/api/public/stats"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+volumes:
+  mysql-data:
+  uploads:

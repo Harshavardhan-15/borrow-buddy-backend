@@ -1,39 +1,26 @@
 # syntax=docker/dockerfile:1
 
 # ---------------------------------------------------------------------------
-# BorrowBuddy application image
+# BorrowBuddy API image
 #
-# Build from the REPOSITORY ROOT so the React frontend can be compiled and
-# packaged into the Spring Boot jar:
-#   docker build -f backend/Dockerfile -t borrowbuddy-api .
+# Build from this repository's root:
+#   docker build -t borrowbuddy-api .
+#
+# The React frontend is deployed separately and is not packaged into this
+# image; this container serves the REST API and the uploaded images.
 # ---------------------------------------------------------------------------
 
-# ---------- frontend build stage ----------
-FROM node:20-alpine AS frontend
-WORKDIR /workspace/frontend-react
-
-# Cache npm dependencies first
-COPY frontend-react/package.json frontend-react/package-lock.json ./
-RUN npm ci
-
-# Copy the React sources and produce the production bundle
-COPY frontend-react/ ./
-RUN npm run build
-
-# ---------- backend build stage ----------
+# ---------- build stage ----------
 FROM maven:3.9.9-eclipse-temurin-21 AS build
 WORKDIR /workspace
 
 # Cache dependencies first
-COPY backend/pom.xml backend/pom.xml
-RUN mvn -f backend/pom.xml -B -q dependency:go-offline
+COPY pom.xml ./
+RUN mvn -B -q dependency:go-offline
 
-# Copy sources and the compiled React bundle (Maven copies ../frontend-react/dist
-# into target/classes/static)
-COPY backend/src backend/src
-COPY --from=frontend /workspace/frontend-react/dist frontend-react/dist
-
-RUN mvn -f backend/pom.xml -B -q clean package -DskipTests
+# Copy sources and build the jar (tests run in CI, not in the image build)
+COPY src ./src
+RUN mvn -B -q clean package -DskipTests
 
 # ---------- runtime stage ----------
 FROM eclipse-temurin:21-jre-jammy
@@ -47,7 +34,7 @@ RUN apt-get update \
     && mkdir -p /app/uploads \
     && chown -R borrowbuddy:borrowbuddy /app
 
-COPY --from=build /workspace/backend/target/borrowbuddy-1.0.0.jar /app/app.jar
+COPY --from=build /workspace/target/borrowbuddy-1.0.0.jar /app/app.jar
 
 USER borrowbuddy
 

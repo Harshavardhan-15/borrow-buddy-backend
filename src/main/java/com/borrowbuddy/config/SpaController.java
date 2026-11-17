@@ -4,12 +4,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 /**
- * Serves the React single-page application for client-side routes.
+ * Serves the React single-page application for client-side routes when the
+ * build is packaged into {@code static/}.
  *
- * <p>The production build is copied into {@code static/} by Maven. Static
- * assets are served directly, while the routes below forward to
- * {@code index.html} so React Router can render the correct page on a hard
- * refresh or a direct link.</p>
+ * <p>This API image is deployed on its own and the React app is hosted on
+ * Vercel, so {@code static/} is normally empty and these routes are not used.
+ * If you package the frontend into the jar (copy {@code dist/} into
+ * {@code src/main/resources/static/}), static assets are served directly and
+ * the routes below forward to {@code index.html} so React Router can render the
+ * correct page on a hard refresh or a direct link.</p>
  */
 @Controller
 public class SpaController {

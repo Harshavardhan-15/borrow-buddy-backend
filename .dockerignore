@@ -1,8 +1,16 @@
-# Only used when the Docker build context is set to ./backend.
-# The documented build uses the repository root as the context, where the
-# root .dockerignore applies. Kept for convenience.
-target/
-uploads/
-*.log
-.idea/
-.vscode/
+# Docker build context exclusions (repository root is the build context)
+.git
+.gitignore
+.idea
+.vscode
+.env
+.env.*
+!.env.example
+target
+uploads
+**/*.log
+docs
+database
+README.md
+docker-compose.yml
+render.yaml

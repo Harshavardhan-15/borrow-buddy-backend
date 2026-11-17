@@ -1,0 +1,21 @@
+# Build output
+target/
+
+# Local uploads fallback (images are stored in MySQL)
+uploads/
+
+# Environment files
+.env
+.env.*
+!.env.example
+!aiven.env.example
+
+# Logs
+*.log
+
+# IDE and OS files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

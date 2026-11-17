@@ -1,0 +1,639 @@
+{
+  "info": {
+    "_postman_id": "b7c2f4a0-9d3e-4f61-8a52-6c1f0d2e7b44",
+    "name": "BorrowBuddy API",
+    "description": "BorrowBuddy - smart borrow and lend platform for college students.\n\nRun **Auth > Login** first. The test script stores the JWT in the `token` collection variable, and later requests inherit it.\n\nDemo accounts (dev profile, password `Password123`): aarav@college.edu, priya@college.edu, rohan@college.edu, sara@college.edu.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      { "key": "token", "value": "{{token}}", "type": "string" }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "itemId", "value": "1", "type": "string" },
+    { "key": "requestId", "value": "", "type": "string" },
+    { "key": "transactionId", "value": "", "type": "string" },
+    { "key": "qrToken", "value": "", "type": "string" },
+    { "key": "notificationId", "value": "", "type": "string" },
+    { "key": "studentId", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"New Student\",\n  \"collegeEmail\": \"new.student@college.edu\",\n  \"password\": \"Password123\",\n  \"confirmPassword\": \"Password123\",\n  \"studentId\": \"STU2099001\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/register", "host": ["{{baseUrl}}"], "path": ["api", "auth", "register"] },
+            "description": "Creates a STUDENT account. Email must match ALLOWED_EMAIL_DOMAINS."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('token', body.data.token);",
+                  "  pm.collectionVariables.set('studentId', String(body.data.user.id));",
+                  "  console.log('Saved token for', body.data.user.collegeEmail);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"collegeEmail\": \"aarav@college.edu\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('login succeeds', () => pm.response.to.have.status(200));",
+                  "const body = pm.response.json();",
+                  "pm.test('returns a token', () => pm.expect(body.data.token).to.be.a('string').and.not.empty);",
+                  "pm.collectionVariables.set('token', body.data.token);",
+                  "pm.collectionVariables.set('studentId', String(body.data.user.id));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Me",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/auth/me", "host": ["{{baseUrl}}"], "path": ["api", "auth", "me"] }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/auth/logout", "host": ["{{baseUrl}}"], "path": ["api", "auth", "logout"] },
+            "description": "Revokes the current token until its natural expiry."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public",
+      "item": [
+        {
+          "name": "Stats",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/public/stats", "host": ["{{baseUrl}}"], "path": ["api", "public", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Items",
+      "item": [
+        {
+          "name": "Browse",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/items?q=&category=&condition=&availableOnly=false&page=0&size=12&sort=createdAt&dir=desc",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "items"],
+              "query": [
+                { "key": "q", "value": "" },
+                { "key": "category", "value": "" },
+                { "key": "condition", "value": "" },
+                { "key": "availableOnly", "value": "false" },
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "12" },
+                { "key": "sort", "value": "createdAt" },
+                { "key": "dir", "value": "desc" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/items/search?q=calculator",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "items", "search"],
+              "query": [{ "key": "q", "value": "calculator" }]
+            }
+          }
+        },
+        {
+          "name": "Featured",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/items/featured", "host": ["{{baseUrl}}"], "path": ["api", "items", "featured"] }
+          }
+        },
+        {
+          "name": "Mine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/items/mine", "host": ["{{baseUrl}}"], "path": ["api", "items", "mine"] }
+          }
+        },
+        {
+          "name": "Get by id",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/items/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["api", "items", "{{itemId}}"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemName\": \"Postman Test Tripod\",\n  \"category\": \"Electronics\",\n  \"description\": \"Lightweight camera tripod used for API testing. Includes carry bag.\",\n  \"imageUrl\": null,\n  \"itemCondition\": \"GOOD\",\n  \"availabilityStatus\": \"AVAILABLE\",\n  \"pricePerDay\": 30.00,\n  \"securityDeposit\": 500.00,\n  \"contactPhone\": \"+91 98765 43210\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/items", "host": ["{{baseUrl}}"], "path": ["api", "items"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('itemId', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Update",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemName\": \"Postman Test Tripod (updated)\",\n  \"category\": \"Electronics\",\n  \"description\": \"Lightweight camera tripod used for API testing. Includes carry bag and quick-release plate.\",\n  \"imageUrl\": null,\n  \"itemCondition\": \"LIKE_NEW\",\n  \"availabilityStatus\": \"AVAILABLE\",\n  \"pricePerDay\": 35.00,\n  \"securityDeposit\": 500.00,\n  \"contactPhone\": \"+91 98765 43210\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/items/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["api", "items", "{{itemId}}"] }
+          }
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/items/{{itemId}}", "host": ["{{baseUrl}}"], "path": ["api", "items", "{{itemId}}"] },
+            "description": "Soft delete. Returns 409 if the item has active requests or a handover."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Borrow Requests",
+      "item": [
+        {
+          "name": "Create request",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemId\": {{itemId}},\n  \"startDate\": \"2027-01-10\",\n  \"returnDate\": \"2027-01-12\",\n  \"message\": \"Need this for a weekend project.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/borrow-requests", "host": ["{{baseUrl}}"], "path": ["api", "borrow-requests"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('requestId', String(body.data.id));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Sent",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/borrow-requests/sent", "host": ["{{baseUrl}}"], "path": ["api", "borrow-requests", "sent"] }
+          }
+        },
+        {
+          "name": "Received",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/borrow-requests/received", "host": ["{{baseUrl}}"], "path": ["api", "borrow-requests", "received"] }
+          }
+        },
+        {
+          "name": "Get by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/borrow-requests/{{requestId}}", "host": ["{{baseUrl}}"], "path": ["api", "borrow-requests", "{{requestId}}"] }
+          }
+        },
+        {
+          "name": "Approve",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/borrow-requests/{{requestId}}/approve", "host": ["{{baseUrl}}"], "path": ["api", "borrow-requests", "{{requestId}}", "approve"] },
+            "description": "Owner only. Creates an AWAITING_HANDOVER transaction."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data.transactionId) {",
+                  "    pm.collectionVariables.set('transactionId', String(body.data.transactionId));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Reject",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/borrow-requests/{{requestId}}/reject", "host": ["{{baseUrl}}"], "path": ["api", "borrow-requests", "{{requestId}}", "reject"] }
+          }
+        },
+        {
+          "name": "Cancel",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/borrow-requests/{{requestId}}/cancel", "host": ["{{baseUrl}}"], "path": ["api", "borrow-requests", "{{requestId}}", "cancel"] },
+            "description": "Borrower only. Pending requests only."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transactions",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/transactions", "host": ["{{baseUrl}}"], "path": ["api", "transactions"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data.length > 0) {",
+                  "    pm.collectionVariables.set('transactionId', String(body.data[0].id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Get by id",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/transactions/{{transactionId}}", "host": ["{{baseUrl}}"], "path": ["api", "transactions", "{{transactionId}}"] }
+          }
+        },
+        {
+          "name": "Get handover QR",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/transactions/{{transactionId}}/qr", "host": ["{{baseUrl}}"], "path": ["api", "transactions", "{{transactionId}}", "qr"] },
+            "description": "Owner only. Each call rotates the token; only the SHA-256 hash is stored."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  pm.collectionVariables.set('qrToken', body.data.token);",
+                  "  pm.test('QR image is a PNG data URL', () => pm.expect(body.data.imageDataUrl).to.match(/^data:image\\/png;base64,/));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirm handover (by id)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{qrToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/transactions/{{transactionId}}/handover", "host": ["{{baseUrl}}"], "path": ["api", "transactions", "{{transactionId}}", "handover"] }
+          }
+        },
+        {
+          "name": "Scan handover token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"token\": \"{{qrToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/transactions/scan", "host": ["{{baseUrl}}"], "path": ["api", "transactions", "scan"] },
+            "description": "Borrower scans or pastes the owner's token."
+          }
+        },
+        {
+          "name": "Confirm return",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/transactions/{{transactionId}}/return", "host": ["{{baseUrl}}"], "path": ["api", "transactions", "{{transactionId}}", "return"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reviews",
+      "item": [
+        {
+          "name": "Pending",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/reviews/pending", "host": ["{{baseUrl}}"], "path": ["api", "reviews", "pending"] }
+          }
+        },
+        {
+          "name": "Create",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": {{transactionId}},\n  \"rating\": 5,\n  \"comment\": \"Smooth handover and the item was exactly as described.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/reviews", "host": ["{{baseUrl}}"], "path": ["api", "reviews"] }
+          }
+        },
+        {
+          "name": "Mine",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/reviews/mine", "host": ["{{baseUrl}}"], "path": ["api", "reviews", "mine"] }
+          }
+        },
+        {
+          "name": "For student",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/reviews/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["api", "reviews", "{{studentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Students",
+      "item": [
+        {
+          "name": "My profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/students/profile", "host": ["{{baseUrl}}"], "path": ["api", "students", "profile"] }
+          }
+        },
+        {
+          "name": "Update profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aarav Sharma\",\n  \"studentId\": \"STU2024001\",\n  \"profileImage\": null\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/students/profile", "host": ["{{baseUrl}}"], "path": ["api", "students", "profile"] }
+          }
+        },
+        {
+          "name": "Public profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/students/{{studentId}}", "host": ["{{baseUrl}}"], "path": ["api", "students", "{{studentId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/notifications?page=0&size=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "notifications"],
+              "query": [
+                { "key": "page", "value": "0" },
+                { "key": "size", "value": "20" }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "  const body = pm.response.json();",
+                  "  if (body.data.content.length > 0) {",
+                  "    pm.collectionVariables.set('notificationId', String(body.data.content[0].id));",
+                  "  }",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Unread count",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/notifications/unread-count", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "unread-count"] }
+          }
+        },
+        {
+          "name": "Mark one read",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/notifications/{{notificationId}}/read", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "{{notificationId}}", "read"] }
+          }
+        },
+        {
+          "name": "Mark all read",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/notifications/read-all", "host": ["{{baseUrl}}"], "path": ["api", "notifications", "read-all"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard",
+      "item": [
+        {
+          "name": "Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/dashboard/stats", "host": ["{{baseUrl}}"], "path": ["api", "dashboard", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads",
+      "item": [
+        {
+          "name": "Upload image",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/api/uploads", "host": ["{{baseUrl}}"], "path": ["api", "uploads"] },
+            "description": "JPEG, PNG, WEBP or GIF. Maximum 5 MB. The returned /uploads/... URL can be used as imageUrl."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reports",
+      "item": [
+        {
+          "name": "Create report",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"targetType\": \"ITEM\",\n  \"targetId\": {{itemId}},\n  \"reason\": \"The description does not match the photo.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/reports", "host": ["{{baseUrl}}"], "path": ["api", "reports"] }
+          }
+        },
+        {
+          "name": "Admin - list reports",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports?status=OPEN",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports"],
+              "query": [{ "key": "status", "value": "OPEN" }]
+            },
+            "description": "Requires ROLE_ADMIN. Promote a user in MySQL, then log in again."
+          }
+        },
+        {
+          "name": "Admin - update report",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/reports/1?status=RESOLVED",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "admin", "reports", "1"],
+              "query": [{ "key": "status", "value": "RESOLVED" }]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
