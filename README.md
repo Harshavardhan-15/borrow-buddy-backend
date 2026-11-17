@@ -7,6 +7,17 @@ students, hand items over with a QR code, and review each other afterwards.
 The React UI lives in
 [borrow-buddy-frontend](https://github.com/Harshavardhan-15/borrow-buddy-frontend).
 
+## Live deployment
+
+| Piece | URL |
+| --- | --- |
+| API | <https://borrowbuddy-api-zeu2.onrender.com> |
+| Health check | <https://borrowbuddy-api-zeu2.onrender.com/api/public/stats> |
+| React app (Vercel) | <https://borrowbuddy-lyart.vercel.app> |
+
+The API runs on Render (Frankfurt) against the Aiven MySQL service. Free Render
+instances sleep after inactivity, so the first request can take 30–60 seconds.
+
 ## Features
 
 - **JWT auth** with a college-email domain allow-list, BCrypt hashing and a

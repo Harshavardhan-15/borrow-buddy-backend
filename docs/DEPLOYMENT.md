@@ -529,8 +529,9 @@ deploys are just "push to `main`".
    `RENDER_DEPLOY_HOOK_URL` repository secret and, optionally, the public origin
    as the `PUBLIC_BASE_URL` repository variable.
    `.github/workflows/deploy.yml` then triggers a deploy after CI passes on
-   `main` and polls the health endpoint. `render.yaml` sets `autoDeploy: true`,
-   so set it to `false` if you use the workflow, otherwise each push deploys
+   `main` and polls the health endpoint; without the secret it skips with a
+   notice, because `render.yaml` already sets `autoDeploy: true`. Set
+   `autoDeploy: false` if you enable the hook, otherwise each push deploys
    twice.
 8. **Harden** — work through the
    [production hardening checklist](#production-hardening-checklist) and switch
@@ -547,13 +548,27 @@ deploys are just "push to `main`".
 | Aiven for MySQL provisioned + data migrated | ✅ Completed (MySQL 8.4.11) |
 | Aiven connection verified from the running app | ✅ Completed |
 | Images stored in MySQL and served with caching | ✅ Completed and verified on Aiven |
-| Rate limiting + security headers | ✅ Implemented and verified locally |
+| Rate limiting + security headers | ✅ Verified on the live API |
 | Automated tests | ✅ Executed (13 tests, 0 failures) |
-| CI (tests + Docker image) | ✅ Workflow written; runs on first push |
-| GitHub push | ❌ Not performed from the build environment — no credentials |
-| Render backend | ❌ Not deployed |
-| Live URL | ❌ Does not exist yet |
+| CI (tests + Docker image) | ✅ Passing on GitHub Actions |
+| GitHub push | ✅ `Harshavardhan-15/borrow-buddy-backend` |
+| Render backend | ✅ <https://borrowbuddy-api-zeu2.onrender.com> (Frankfurt, free plan) |
+| Vercel frontend | ✅ <https://borrowbuddy-lyart.vercel.app> |
+| Live URL | ✅ <https://borrowbuddy-lyart.vercel.app> |
 
-The Aiven database is live and the application connects to it. This repository
-is deployment-ready; the remaining steps need hosting and Git credentials that
-were not available in the build environment.
+Verified on the live deployment:
+
+- `GET /api/public/stats` returns `{"students":7,"items":12,"completedBorrows":4}`.
+- Login with a demo account returns a JWT and the dashboard renders real data.
+- `GET /api/items?size=12` returns all 12 listings; all 12 images load from
+  `/uploads/...` on the API origin with an `ETag` and immutable caching.
+- CORS preflight and the login `POST` return
+  `Access-Control-Allow-Origin: https://borrowbuddy-lyart.vercel.app`.
+- HSTS, `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy` and
+  `Permissions-Policy` are present on HTTPS responses.
+- The 10th login attempt within a minute returns `429` with `Retry-After`.
+- The browser console shows no errors on the home, browse, login and dashboard
+  pages.
+
+The API runs on Render's free plan, so it sleeps after 15 minutes of
+inactivity; the first request after a sleep can take 30–60 seconds.

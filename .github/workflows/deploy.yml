@@ -31,8 +31,11 @@ jobs:
           DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
           if [ -z "$DEPLOY_HOOK" ]; then
-            echo "::error::RENDER_DEPLOY_HOOK_URL is not configured. Add it under Settings -> Secrets and variables -> Actions."
-            exit 1
+            # render.yaml sets autoDeploy: true, so Render already redeploys on
+            # every push. Only use this workflow when deploys must be gated on
+            # CI; in that case add the secret and set autoDeploy: false.
+            echo "::notice::RENDER_DEPLOY_HOOK_URL is not configured; Render's autoDeploy handles this push."
+            exit 0
           fi
           echo "Triggering Render deploy..."
           curl -fsS -X POST "$DEPLOY_HOOK" -o /dev/null -w "Render responded with HTTP %{http_code}\n"
