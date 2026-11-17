@@ -572,3 +572,7 @@ Verified on the live deployment:
 
 The API runs on Render's free plan, so it sleeps after 15 minutes of
 inactivity; the first request after a sleep can take 30–60 seconds.
+
+The service only serves `/api/**` and `/uploads/**`. Frontend paths opened on
+the API origin (`/`, `/dashboard`, `/items/13`, …) redirect to the same path on
+the first `FRONTEND_URL` entry, so a shared link never shows the JSON 404 body.

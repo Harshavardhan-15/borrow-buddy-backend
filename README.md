@@ -18,6 +18,11 @@ The React UI lives in
 The API runs on Render (Frankfurt) against the Aiven MySQL service. Free Render
 instances sleep after inactivity, so the first request can take 30–60 seconds.
 
+This service only serves `/api/**` and `/uploads/**`. Opening the API origin, or
+any frontend path on it (for example `/dashboard` or `/items/13`), redirects to
+the same path on the configured `FRONTEND_URL` so a shared link still lands on
+the React app. Unknown `/api/**` paths keep returning the JSON 404 envelope.
+
 ## Features
 
 - **JWT auth** with a college-email domain allow-list, BCrypt hashing and a
