@@ -66,34 +66,44 @@ public class DataSeeder implements CommandLineRunner {
 
         Item calculator = item(aarav, "Casio FX-991EX Scientific Calculator", "Electronics",
                 "Exam-approved scientific calculator with 552 functions. Includes a protective slide cover.",
-                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("200"), "+91 98765 43210");
+                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("200"), "+91 98765 43210",
+                "/uploads/4b72a97d-bda2-478c-8cf5-5d81f554b7ee.jpg");
         Item textbook = item(aarav, "Data Structures & Algorithms Textbook", "Books",
                 "Second edition, clean pages with light highlighting in chapters 3-4. Perfect for CS201.",
-                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"), "+91 98765 43210");
+                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"), "+91 98765 43210",
+                "/uploads/5afa05a3-3e59-43f7-8b63-fbba2f6c2938.jpg");
         item(aarav, "Arduino Uno Starter Kit", "Electronics",
                 "Uno R3 board, breadboard, jumper wires, LEDs and a sensor pack. Great for mini projects.",
-                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"), "+91 98765 43210");
+                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"), "+91 98765 43210",
+                "/uploads/3df12067-a5ee-4541-8bc9-ff47e63954c0.jpg");
         item(aarav, "Yonex Badminton Racket", "Sports",
                 "Lightweight graphite racket with a fresh grip. Two shuttlecocks included.",
-                ItemCondition.GOOD, new BigDecimal("25"), new BigDecimal("250"), "+91 98765 43210");
+                ItemCondition.GOOD, new BigDecimal("25"), new BigDecimal("250"), "+91 98765 43210",
+                "/uploads/7f93b161-6216-4e42-b082-8ffc256ba2e3.jpg");
         Item labCoat = item(priya, "Women's Lab Coat (Size M)", "Lab Equipment",
                 "Freshly laundered white lab coat, size M. Required for chemistry and biology labs.",
-                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"), "+91 98765 43211");
+                ItemCondition.LIKE_NEW, new BigDecimal("15"), new BigDecimal("150"), "+91 98765 43211",
+                "/uploads/ad4c0bd0-c0e0-4d29-810b-85a44e68c0ed.jpg");
         Item headphones = item(priya, "Sony WH-CH510 Headphones", "Electronics",
                 "Wireless over-ear headphones with 30-hour battery life and USB-C charging.",
-                ItemCondition.GOOD, new BigDecimal("30"), new BigDecimal("500"), "+91 98765 43211");
+                ItemCondition.GOOD, new BigDecimal("30"), new BigDecimal("500"), "+91 98765 43211",
+                "/uploads/447d080c-badb-48ac-a93e-7c8c45107af1.jpg");
         item(rohan, "MacBook Pro 67W USB-C Charger", "Electronics",
                 "Original Apple 67W charger with a 2m USB-C cable. Ideal for exam-week emergencies.",
-                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("300"), "+91 98765 43212");
+                ItemCondition.GOOD, new BigDecimal("20"), new BigDecimal("300"), "+91 98765 43212",
+                "/uploads/3c9ade11-2de8-4ae2-bf6e-7952de0fb3aa.jpg");
         item(rohan, "Canon EOS 200D DSLR Camera", "Electronics",
                 "24MP DSLR with an 18-55mm lens, bag and 64GB SD card. For club events and projects.",
-                ItemCondition.LIKE_NEW, new BigDecimal("150"), new BigDecimal("2000"), "+91 98765 43212");
+                ItemCondition.LIKE_NEW, new BigDecimal("150"), new BigDecimal("2000"), "+91 98765 43212",
+                "/uploads/3954a471-3e1e-4576-88a6-4833b55bf440.jpg");
         item(sara, "Engineering Drawing Kit", "Stationery",
                 "Drawing board, T-square, set squares, compass and isometric sheets. Complete kit.",
-                ItemCondition.NEW, new BigDecimal("25"), new BigDecimal("300"), "+91 98765 43213");
+                ItemCondition.NEW, new BigDecimal("25"), new BigDecimal("300"), "+91 98765 43213",
+                "/uploads/aa8044ff-51eb-4f84-a7a4-ede7fba0a1ef.jpg");
         item(sara, "Texas Instruments TI-84 Graphing Calculator", "Electronics",
                 "Graphing calculator for calculus and statistics. Batteries included.",
-                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"), "+91 98765 43213");
+                ItemCondition.GOOD, new BigDecimal("40"), new BigDecimal("500"), "+91 98765 43213",
+                "/uploads/98ddbdd8-6ed3-49cb-9641-db189b093b0d.jpg");
 
         LocalDate today = LocalDate.now();
 
@@ -154,12 +164,13 @@ public class DataSeeder implements CommandLineRunner {
 
     private Item item(Student owner, String name, String category, String description,
                       ItemCondition condition, BigDecimal pricePerDay, BigDecimal securityDeposit,
-                      String contactPhone) {
+                      String contactPhone, String imageUrl) {
         Item item = new Item();
         item.setOwner(owner);
         item.setItemName(name);
         item.setCategory(category);
         item.setDescription(description);
+        item.setImageUrl(imageUrl);
         item.setItemCondition(condition);
         item.setPricePerDay(pricePerDay);
         item.setSecurityDeposit(securityDeposit);
