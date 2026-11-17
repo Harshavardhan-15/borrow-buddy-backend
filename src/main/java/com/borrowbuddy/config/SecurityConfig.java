@@ -1,6 +1,7 @@
 package com.borrowbuddy.config;
 
 import com.borrowbuddy.security.JwtAuthenticationFilter;
+import com.borrowbuddy.security.RateLimitFilter;
 import com.borrowbuddy.security.RestAccessDeniedHandler;
 import com.borrowbuddy.security.RestAuthenticationEntryPoint;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -31,6 +33,7 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RateLimitFilter rateLimitFilter;
     private final RestAuthenticationEntryPoint authenticationEntryPoint;
     private final RestAccessDeniedHandler accessDeniedHandler;
 
@@ -38,9 +41,11 @@ public class SecurityConfig {
     private String allowedOrigins;
 
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
+                          RateLimitFilter rateLimitFilter,
                           RestAuthenticationEntryPoint authenticationEntryPoint,
                           RestAccessDeniedHandler accessDeniedHandler) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.rateLimitFilter = rateLimitFilter;
         this.authenticationEntryPoint = authenticationEntryPoint;
         this.accessDeniedHandler = accessDeniedHandler;
     }
@@ -67,8 +72,18 @@ public class SecurityConfig {
                                 "/items/**", "/students/**").permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .anyRequest().authenticated())
+                .addFilterBefore(rateLimitFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()));
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31_536_000))
+                        .referrerPolicy(referrer -> referrer
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN))
+                        // The QR scanner uses the camera; nothing else is needed.
+                        .permissionsPolicy(permissions -> permissions
+                                .policy("camera=(self), microphone=(), geolocation=(), payment=()")));
 
         return http.build();
     }
