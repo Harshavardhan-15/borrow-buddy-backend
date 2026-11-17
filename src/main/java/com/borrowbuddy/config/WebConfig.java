@@ -21,8 +21,12 @@ public class WebConfig implements WebMvcConfigurer {
         if (!location.endsWith("/")) {
             location += "/";
         }
+        // Runtime uploads are written to the filesystem and take precedence.
+        // Demo listing photos shipped with the app are bundled on the classpath
+        // (src/main/resources/static/uploads) so they survive a container
+        // deploy where the upload directory starts empty.
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations(location)
+                .addResourceLocations(location, "classpath:/static/uploads/")
                 .setCachePeriod(3600);
     }
 }
