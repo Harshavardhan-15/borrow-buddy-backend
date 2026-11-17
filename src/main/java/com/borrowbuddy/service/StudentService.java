@@ -75,9 +75,9 @@ public class StudentService {
     }
 
     private StudentProfileDto buildProfile(Student student, Student viewer) {
-        List<ItemDto> items = itemRepository
-                .findByOwnerIdAndDeletedFalseOrderByCreatedAtDesc(student.getId())
-                .stream().map(item -> mapperService.toItemDto(item, viewer)).toList();
+        List<ItemDto> items = mapperService.toItemDtos(
+                itemRepository.findByOwnerIdAndDeletedFalseOrderByCreatedAtDesc(student.getId()),
+                viewer);
 
         long listedItems = itemRepository.countByOwnerIdAndDeletedFalse(student.getId());
         long totalBorrowed = requestRepository.countByBorrowerIdAndStatusIn(

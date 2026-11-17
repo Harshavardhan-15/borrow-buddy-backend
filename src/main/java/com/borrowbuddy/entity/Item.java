@@ -57,7 +57,7 @@ public class Item {
     @Column(name = "contact_phone", length = 20)
     private String contactPhone;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne(fetch = FetchType.EAGER, optional = false)
     @JoinColumn(name = "owner_id", nullable = false, foreignKey = @ForeignKey(name = "fk_items_owner"))
     private Student owner;
 

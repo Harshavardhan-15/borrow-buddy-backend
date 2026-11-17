@@ -15,10 +15,19 @@ import com.borrowbuddy.entity.enums.RequestStatus;
 import com.borrowbuddy.entity.enums.TransactionStatus;
 import com.borrowbuddy.repository.BorrowRequestRepository;
 import com.borrowbuddy.repository.BorrowTransactionRepository;
+import com.borrowbuddy.repository.RatingAggregate;
+import com.borrowbuddy.repository.ReservationEnd;
 import com.borrowbuddy.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class MapperService {
@@ -39,6 +48,38 @@ public class MapperService {
         double average = reviewRepository.averageRatingFor(student.getId());
         long count = reviewRepository.countByReviewedStudentId(student.getId());
         return new OwnerSummary(student.getId(), student.getName(), student.getProfileImage(), average, count);
+    }
+
+    /**
+     * Builds owner summaries for many students with one aggregate query instead
+     * of two queries per student. Used by list endpoints to avoid N+1 queries.
+     */
+    public Map<Long, OwnerSummary> ownerSummaries(Collection<Student> students) {
+        if (students == null || students.isEmpty()) {
+            return Map.of();
+        }
+        Map<Long, Student> unique = new LinkedHashMap<>();
+        for (Student student : students) {
+            if (student != null && student.getId() != null) {
+                unique.putIfAbsent(student.getId(), student);
+            }
+        }
+        if (unique.isEmpty()) {
+            return Map.of();
+        }
+
+        Map<Long, RatingAggregate> ratings = reviewRepository.ratingAggregates(unique.keySet()).stream()
+                .collect(Collectors.toMap(RatingAggregate::getStudentId, aggregate -> aggregate));
+
+        Map<Long, OwnerSummary> summaries = new HashMap<>();
+        for (Student student : unique.values()) {
+            RatingAggregate aggregate = ratings.get(student.getId());
+            double average = aggregate == null || aggregate.getAverage() == null ? 0.0 : aggregate.getAverage();
+            long count = aggregate == null || aggregate.getCount() == null ? 0L : aggregate.getCount();
+            summaries.put(student.getId(), new OwnerSummary(
+                    student.getId(), student.getName(), student.getProfileImage(), average, count));
+        }
+        return summaries;
     }
 
     public UserDto toUserDto(Student student) {
@@ -73,6 +114,33 @@ public class MapperService {
     public ItemDto toItemDto(Item item, Student current) {
         LocalDate today = LocalDate.now();
         LocalDate reservedUntil = borrowRequestRepository.findCurrentReservationEnd(item.getId(), today);
+        return toItemDto(item, current, toOwnerSummary(item.getOwner()), reservedUntil);
+    }
+
+    /**
+     * Maps a list of items with batched reservation and owner-rating lookups,
+     * so a page of items costs a constant number of queries.
+     */
+    public List<ItemDto> toItemDtos(List<Item> items, Student current) {
+        if (items == null || items.isEmpty()) {
+            return List.of();
+        }
+        LocalDate today = LocalDate.now();
+        List<Long> itemIds = items.stream().map(Item::getId).filter(Objects::nonNull).toList();
+        Map<Long, LocalDate> reservations = itemIds.isEmpty() ? Map.of()
+                : borrowRequestRepository.findCurrentReservationEnds(itemIds, today).stream()
+                .collect(Collectors.toMap(ReservationEnd::getItemId, ReservationEnd::getReturnDate));
+        Map<Long, OwnerSummary> owners = ownerSummaries(items.stream().map(Item::getOwner).toList());
+
+        return items.stream()
+                .map(item -> toItemDto(item, current,
+                        owners.get(item.getOwner().getId()),
+                        reservations.get(item.getId())))
+                .toList();
+    }
+
+    public ItemDto toItemDto(Item item, Student current, OwnerSummary owner, LocalDate reservedUntil) {
+        LocalDate today = LocalDate.now();
         boolean reservedNow = reservedUntil != null;
         boolean availableNow = !item.isDeleted()
                 && item.getAvailabilityStatus() == AvailabilityStatus.AVAILABLE
@@ -93,7 +161,7 @@ public class MapperService {
                 availableNow,
                 reservedNow,
                 reservedNow ? reservedUntil.plusDays(1) : today,
-                toOwnerSummary(item.getOwner()),
+                owner,
                 item.getCreatedAt(),
                 ownedByMe
         );

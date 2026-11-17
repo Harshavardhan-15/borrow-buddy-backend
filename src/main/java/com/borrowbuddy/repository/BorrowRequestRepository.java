@@ -60,6 +60,19 @@ public interface BorrowRequestRepository extends JpaRepository<BorrowRequest, Lo
             """)
     LocalDate findCurrentReservationEnd(@Param("itemId") Long itemId, @Param("date") LocalDate date);
 
+    /** Reservation end dates for many items at once (avoids one query per item). */
+    @Query("""
+            select r.item.id as itemId, max(r.returnDate) as returnDate
+            from BorrowRequest r
+            where r.item.id in :itemIds
+              and r.status = com.borrowbuddy.entity.enums.RequestStatus.APPROVED
+              and r.startDate <= :date
+              and r.returnDate >= :date
+            group by r.item.id
+            """)
+    List<ReservationEnd> findCurrentReservationEnds(@Param("itemIds") Collection<Long> itemIds,
+                                                    @Param("date") LocalDate date);
+
     @Query("""
             select r from BorrowRequest r
             where r.item.id = :itemId

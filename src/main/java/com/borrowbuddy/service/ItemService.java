@@ -27,6 +27,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class ItemService {
@@ -58,15 +60,18 @@ public class ItemService {
         Pageable pageable = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 48), sort);
         Page<Item> result = itemRepository.findAll(
                 ItemSpecifications.browse(query, category, condition, availableOnly), pageable);
-        return PageResponse.from(result.map(item -> mapperService.toItemDto(item, current)));
+        Map<Long, ItemDto> mapped = mapperService.toItemDtos(result.getContent(), current).stream()
+                .collect(Collectors.toMap(ItemDto::id, dto -> dto));
+        return PageResponse.from(result.map(item -> mapped.get(item.getId())));
     }
 
     @Transactional(readOnly = true)
     public List<ItemDto> featured() {
         Student current = currentUserService.currentOrNull();
-        return itemRepository.findTop6ByDeletedFalseAndAvailabilityStatusOrderByCreatedAtDesc(
-                        AvailabilityStatus.AVAILABLE)
-                .stream().map(item -> mapperService.toItemDto(item, current)).toList();
+        return mapperService.toItemDtos(
+                itemRepository.findTop6ByDeletedFalseAndAvailabilityStatusOrderByCreatedAtDesc(
+                        AvailabilityStatus.AVAILABLE),
+                current);
     }
 
     @Transactional(readOnly = true)
@@ -83,8 +88,9 @@ public class ItemService {
 
     @Transactional(readOnly = true)
     public List<ItemDto> mine(Student current) {
-        return itemRepository.findByOwnerIdAndDeletedFalseOrderByCreatedAtDesc(current.getId())
-                .stream().map(item -> mapperService.toItemDto(item, current)).toList();
+        return mapperService.toItemDtos(
+                itemRepository.findByOwnerIdAndDeletedFalseOrderByCreatedAtDesc(current.getId()),
+                current);
     }
 
     @Transactional
